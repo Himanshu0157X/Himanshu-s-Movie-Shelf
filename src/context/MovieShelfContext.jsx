@@ -40,14 +40,18 @@ export function MovieShelfProvider({ children }) {
   const [error, setError] = useState('');
   useEffect(() => {
     if (!firebaseEnabled) { setLoading(false); return; }
-    return onSnapshot(
+    let timer;
+    const settle = (msg) => { clearTimeout(timer); setLoading(false); setError(msg); };
+    timer = setTimeout(() => settle('The shelf is taking too long to load. Please try again.'), 10000);
+    const un = onSnapshot(
       collection(db, 'movies'),
       (snap) => {
         setMovies(snap.docs.map((doc) => sanitizeMovie({ id: doc.id, ...doc.data() })).sort((a, b) => (b.addedAt || '').localeCompare(a.addedAt || '')));
-        setLoading(false);
+        settle('');
       },
-      (e) => { setLoading(false); setError(`Could not load the shelf: ${e?.message || 'Firestore unreachable.'}`); }
+      (e) => settle(`Could not load the shelf: ${e?.message || 'Firestore unreachable.'}`)
     );
+    return () => { clearTimeout(timer); un(); };
   }, []);
   return <MovieShelfContext.Provider value={{ movies, loading, error }}>{children}</MovieShelfContext.Provider>;
 }

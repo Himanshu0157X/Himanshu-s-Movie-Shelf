@@ -13,6 +13,6 @@ const config = {
 export const firebaseEnabled = Boolean(config.apiKey && config.projectId && config.appId);
 const app = firebaseEnabled ? initializeApp(config) : null;
 export const auth = app ? getAuth(app) : null;
-export const db = app ? initializeFirestore(app, { experimentalForceLongPolling: true }) : null;
+export const db = app ? initializeFirestore(app, { experimentalAutoDetectLongPolling: true }) : null;
 export const googleProvider = new GoogleAuthProvider();
 export const isAdmin = (user) => user?.email?.toLowerCase() === import.meta.env.VITE_ADMIN_EMAIL?.toLowerCase();
